@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Bell, User, Search, ChevronDown, LogOut, Check } from 'lucide-react';
+import { Bell, User, Search, ChevronDown, LogOut, Menu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { User as UserType } from '../types';
 import { MOCK_NOTIFICATIONS } from '../constants';
+import { useSidebar } from '../contexts/SidebarContext';
 
 interface HeaderProps {
   title: string;
@@ -12,6 +13,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ title, user, onLogout }) => {
   const navigate = useNavigate();
+  const { toggle } = useSidebar();
   const [searchTerm, setSearchTerm] = useState('');
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -35,14 +37,22 @@ const Header: React.FC<HeaderProps> = ({ title, user, onLogout }) => {
   };
 
   return (
-    <header className="h-20 px-8 sticky top-0 z-20 flex items-center justify-between bg-white border-b border-gray-200 shadow-sm">
-      <div className="flex items-center gap-4">
-        <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
+    <header className="h-16 md:h-20 px-4 md:px-8 sticky top-0 z-30 flex items-center justify-between bg-white border-b border-gray-200 shadow-sm">
+      <div className="flex items-center gap-3 md:gap-4">
+        {/* Mobile Menu Button */}
+        <button 
+          onClick={toggle}
+          className="p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-lg md:hidden"
+        >
+          <Menu size={24} />
+        </button>
+
+        <h2 className="text-lg md:text-2xl font-bold text-gray-800 truncate max-w-[200px] md:max-w-none">{title}</h2>
       </div>
       
-      <div className="flex items-center gap-6">
-        {/* Global Search Bar */}
-        <div className="hidden md:flex items-center bg-gray-100 rounded-lg px-4 py-2 border border-transparent focus-within:border-gray-300 focus-within:bg-white transition-all w-72">
+      <div className="flex items-center gap-3 md:gap-6">
+        {/* Global Search Bar - Hidden on mobile */}
+        <div className="hidden lg:flex items-center bg-gray-100 rounded-lg px-4 py-2 border border-transparent focus-within:border-gray-300 focus-within:bg-white transition-all w-72">
           <Search size={18} className="text-gray-400" />
           <input 
             type="text" 
@@ -54,7 +64,7 @@ const Header: React.FC<HeaderProps> = ({ title, user, onLogout }) => {
           />
         </div>
 
-        <div className="h-6 w-px bg-gray-300"></div>
+        <div className="hidden md:block h-6 w-px bg-gray-300"></div>
 
         {/* Notifications */}
         <div className="relative">
@@ -69,7 +79,7 @@ const Header: React.FC<HeaderProps> = ({ title, user, onLogout }) => {
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
+            <div className="absolute right-0 top-full mt-2 w-72 md:w-80 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
                <div className="px-4 py-2 border-b border-gray-100 flex justify-between items-center">
                   <h3 className="font-bold text-sm text-gray-800">Notificaciones</h3>
                   {unreadCount > 0 && (
@@ -117,19 +127,25 @@ const Header: React.FC<HeaderProps> = ({ title, user, onLogout }) => {
               <span className="text-sm font-bold text-gray-700 leading-tight">{user?.role || 'Invitado'}</span>
               <span className="text-[11px] text-gray-500 font-medium uppercase">{user?.name || 'Iniciar Sesión'}</span>
             </div>
-            <div className="w-9 h-9 bg-red-100 rounded-full flex items-center justify-center border border-red-200 text-red-700">
+            <div className="w-8 h-8 md:w-9 md:h-9 bg-red-100 rounded-full flex items-center justify-center border border-red-200 text-red-700">
               <User size={18} />
             </div>
-            <ChevronDown size={14} className="text-gray-400 mr-1" />
+            <ChevronDown size={14} className="text-gray-400 mr-1 hidden sm:block" />
           </button>
 
           {showUserMenu && (
-            <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
-              <div className="px-4 py-2 border-b border-gray-100 md:hidden">
+            <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
+              <div className="px-4 py-2 border-b border-gray-100 block sm:hidden">
                 <p className="font-bold text-sm text-gray-800">{user?.name}</p>
-                <p className="text-xs text-gray-500">{user?.email}</p>
+                <p className="text-xs text-gray-500">{user?.role}</p>
               </div>
-              <button className="w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-2">
+              <button 
+                onClick={() => {
+                  navigate('/profile');
+                  setShowUserMenu(false);
+                }}
+                className="w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-2"
+              >
                  <User size={14} /> Mi Perfil
               </button>
               <div className="border-t border-gray-100 my-1"></div>

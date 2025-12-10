@@ -43,14 +43,14 @@ const DocumentList: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 bg-slate-100 ml-64">
+    <div className="flex-1 bg-slate-100 w-full">
       <Header title="Lista General de Documentos" />
       
-      <main className="p-8">
+      <main className="p-4 md:p-8">
         <div className="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
           
           {/* Filters Header */}
-          <div className="p-6 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="p-4 md:p-6 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-bold text-slate-800">Archivo Central</h2>
               <p className="text-sm text-slate-500">Visualice y descargue todos los documentos registrados.</p>
@@ -69,7 +69,7 @@ const DocumentList: React.FC = () => {
 
           {/* Table */}
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[900px]">
               <thead className="bg-slate-100 text-slate-600 text-xs uppercase font-bold">
                 <tr>
                   <th className="p-4 border-b border-slate-200">Documento</th>

@@ -56,10 +56,10 @@ const Users: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 bg-slate-50 ml-64">
+    <div className="flex-1 bg-slate-50 w-full">
       <Header title="Gestión de Usuarios" />
       
-      <main className="p-8 max-w-6xl mx-auto">
+      <main className="p-4 md:p-8 max-w-6xl mx-auto">
         
         <div className="flex justify-between items-center mb-6">
             <div>
@@ -68,10 +68,11 @@ const Users: React.FC = () => {
             </div>
             <button 
               onClick={handleOpenCreate}
-              className="bg-red-700 hover:bg-red-800 text-white px-4 py-2.5 rounded-lg font-bold flex items-center gap-2 shadow-md transition-colors"
+              className="bg-red-700 hover:bg-red-800 text-white px-4 py-2.5 rounded-lg font-bold flex items-center gap-2 shadow-md transition-colors text-sm md:text-base"
             >
                 <Plus size={20} />
-                Nuevo Usuario
+                <span className="hidden sm:inline">Nuevo Usuario</span>
+                <span className="sm:hidden">Nuevo</span>
             </button>
         </div>
 
@@ -92,16 +93,16 @@ const Users: React.FC = () => {
                     
                     <h3 className="font-bold text-lg text-slate-800 mb-1">{user.name}</h3>
                     <div className="space-y-2 mb-6">
-                        <div className="flex items-center gap-2 text-sm text-slate-600">
-                            <Mail size={14} />
-                            <span>{user.email}</span>
+                        <div className="flex items-center gap-2 text-sm text-slate-600 truncate">
+                            <Mail size={14} className="shrink-0" />
+                            <span className="truncate">{user.email}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-slate-600">
-                            <Building size={14} />
+                            <Building size={14} className="shrink-0" />
                             <span>{getAreaName(user.areaId || '')}</span>
                         </div>
                          <div className="flex items-center gap-2 text-sm text-slate-600">
-                            <Shield size={14} />
+                            <Shield size={14} className="shrink-0" />
                             <span>{user.role}</span>
                         </div>
                     </div>
@@ -127,7 +128,7 @@ const Users: React.FC = () => {
 
       {/* Modal Form */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
             <div className="bg-red-800 p-4 flex justify-between items-center text-white">
               <h3 className="font-bold text-lg flex items-center gap-2">

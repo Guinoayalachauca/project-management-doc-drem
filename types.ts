@@ -77,3 +77,15 @@ export interface AIRoutingSuggestion {
   reasoning: string;
   prioritySuggestion: DocPriority;
 }
+
+// System Configuration
+export interface SystemConfig {
+  institutionName: string;
+  currentYear: string;
+  deadlineNormal: number;
+  deadlineUrgent: number;
+  autoNumbering: boolean;
+  enable2FA: boolean;
+  emailNotifications: boolean;
+  systemMaintenanceMode: boolean;
+}

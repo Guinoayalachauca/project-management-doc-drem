@@ -1,9 +1,21 @@
-import { DocumentRecord, User, DocStatus, DocPriority } from '../types';
+import { DocumentRecord, User, DocStatus, DocPriority, SystemConfig } from '../types';
 import { MOCK_DOCUMENTS, MOCK_USERS } from '../constants';
 
 const KEYS = {
   DOCUMENTS: 'sisgedo_documents',
-  USERS: 'sisgedo_users'
+  USERS: 'sisgedo_users',
+  CONFIG: 'sisgedo_config'
+};
+
+const DEFAULT_CONFIG: SystemConfig = {
+  institutionName: 'Dirección Regional de Energía y Minas de Apurímac',
+  currentYear: new Date().getFullYear().toString(),
+  deadlineNormal: 7,
+  deadlineUrgent: 2,
+  autoNumbering: true,
+  enable2FA: false,
+  emailNotifications: true,
+  systemMaintenanceMode: false
 };
 
 // --- Initializer ---
@@ -13,6 +25,9 @@ const initializeData = () => {
   }
   if (!localStorage.getItem(KEYS.USERS)) {
     localStorage.setItem(KEYS.USERS, JSON.stringify(MOCK_USERS));
+  }
+  if (!localStorage.getItem(KEYS.CONFIG)) {
+    localStorage.setItem(KEYS.CONFIG, JSON.stringify(DEFAULT_CONFIG));
   }
 };
 
@@ -79,4 +94,15 @@ export const authenticateUser = (emailOrRole: string, password: string): User | 
     (u.email.toLowerCase() === emailOrRole.toLowerCase() || u.role.toLowerCase() === emailOrRole.toLowerCase()) 
     && u.password === password
   );
+};
+
+// --- Configuration Service ---
+
+export const getSystemConfig = (): SystemConfig => {
+  const data = localStorage.getItem(KEYS.CONFIG);
+  return data ? JSON.parse(data) : DEFAULT_CONFIG;
+};
+
+export const saveSystemConfig = (config: SystemConfig): void => {
+  localStorage.setItem(KEYS.CONFIG, JSON.stringify(config));
 };

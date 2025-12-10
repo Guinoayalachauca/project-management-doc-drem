@@ -90,20 +90,20 @@ const Inbox: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 bg-slate-50/50 ml-72 relative">
+    <div className="flex-1 bg-slate-50/50 w-full relative">
       <Header title="Bandeja de Entrada" />
       
-      <main className="p-8 max-w-[1600px] mx-auto">
+      <main className="p-4 md:p-8 max-w-[1600px] mx-auto">
         {/* Filters Toolbar */}
-        <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-4 bg-white p-1 rounded-xl shadow-sm border border-slate-200">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div className="flex flex-wrap items-center gap-2 md:gap-4 bg-white p-1 rounded-xl shadow-sm border border-slate-200">
                 <button 
                   onClick={() => setPriorityFilter('TODOS')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${priorityFilter === 'TODOS' ? 'bg-slate-800 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'}`}
                 >
                   Todos
                 </button>
-                <div className="w-px h-6 bg-slate-200"></div>
+                <div className="hidden md:block w-px h-6 bg-slate-200"></div>
                 <button 
                   onClick={() => setPriorityFilter(DocPriority.URGENT)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${priorityFilter === DocPriority.URGENT ? 'bg-red-50 text-red-700 ring-1 ring-red-200' : 'text-slate-600 hover:text-red-600'}`}
@@ -119,81 +119,83 @@ const Inbox: React.FC = () => {
             </div>
             <div className="flex items-center gap-2 text-sm font-medium text-slate-500 bg-white px-4 py-2 rounded-full shadow-sm border border-slate-200">
                 <Filter size={14} />
-                {inboxDocs.length} documentos pendientes
+                {inboxDocs.length} docs.
             </div>
         </div>
 
         {/* Table Card */}
         <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-100 overflow-hidden">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200 text-xs uppercase text-slate-500 font-bold tracking-wider">
-                <th className="p-5 pl-8 w-16">#</th>
-                <th className="p-5">Expediente / Asunto</th>
-                <th className="p-5">Ubicación Actual</th>
-                <th className="p-5">Prioridad</th>
-                <th className="p-5">Plazo</th>
-                <th className="p-5 text-right pr-8">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {inboxDocs.map((doc, idx) => {
-                 const deadline = getDeadlineInfo(doc.registerDate, doc.priority);
-                 const priorityStyle = getPriorityInfo(doc.priority);
-                 const PriorityIcon = priorityStyle.icon;
-
-                 return (
-                <tr key={doc.id} className="hover:bg-slate-50/80 transition-all group">
-                  <td className="p-5 pl-8 text-slate-400 font-mono text-sm">{idx + 1}</td>
-                  <td className="p-5">
-                    <div className="flex items-start gap-4">
-                      <div className="mt-1 p-2 bg-blue-50 text-blue-600 rounded-lg shrink-0">
-                        <FileText size={20} />
-                      </div>
-                      <div>
-                        <span className="font-bold text-slate-800 text-base group-hover:text-blue-700 transition-colors block mb-1">{doc.code}</span>
-                        <p className="font-medium text-slate-600 text-sm line-clamp-1 mb-1">{doc.subject}</p>
-                        <p className="text-xs text-slate-400 font-medium flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-                          {doc.administrado}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-5">
-                     <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wide">
-                        {AREAS.find(a => a.id === doc.currentAreaId)?.name || doc.currentAreaId}
-                     </span>
-                  </td>
-                  <td className="p-5">
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-inset ${priorityStyle.class}`}>
-                      <PriorityIcon size={12} />
-                      {doc.priority}
-                    </span>
-                  </td>
-                  <td className="p-5">
-                     <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${deadline.color}`}>
-                        {deadline.icon}
-                        <span>{deadline.text}</span>
-                     </div>
-                  </td>
-                  <td className="p-5 text-right pr-8">
-                    <div className="flex items-center justify-end gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
-                        <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
-                            <MoreHorizontal size={20} />
-                        </button>
-                        <button 
-                            onClick={() => openDeriveModal(doc)}
-                            className="bg-slate-900 text-white hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5"
-                        >
-                            Derivar <ArrowRight size={16} />
-                        </button>
-                    </div>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[900px]">
+              <thead>
+                <tr className="bg-slate-50/80 border-b border-slate-200 text-xs uppercase text-slate-500 font-bold tracking-wider">
+                  <th className="p-5 pl-8 w-16">#</th>
+                  <th className="p-5">Expediente / Asunto</th>
+                  <th className="p-5">Ubicación Actual</th>
+                  <th className="p-5">Prioridad</th>
+                  <th className="p-5">Plazo</th>
+                  <th className="p-5 text-right pr-8">Acciones</th>
                 </tr>
-              )})}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {inboxDocs.map((doc, idx) => {
+                  const deadline = getDeadlineInfo(doc.registerDate, doc.priority);
+                  const priorityStyle = getPriorityInfo(doc.priority);
+                  const PriorityIcon = priorityStyle.icon;
+
+                  return (
+                  <tr key={doc.id} className="hover:bg-slate-50/80 transition-all group">
+                    <td className="p-5 pl-8 text-slate-400 font-mono text-sm">{idx + 1}</td>
+                    <td className="p-5">
+                      <div className="flex items-start gap-4">
+                        <div className="mt-1 p-2 bg-blue-50 text-blue-600 rounded-lg shrink-0">
+                          <FileText size={20} />
+                        </div>
+                        <div>
+                          <span className="font-bold text-slate-800 text-base group-hover:text-blue-700 transition-colors block mb-1">{doc.code}</span>
+                          <p className="font-medium text-slate-600 text-sm line-clamp-1 mb-1 max-w-xs">{doc.subject}</p>
+                          <p className="text-xs text-slate-400 font-medium flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                            {doc.administrado}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-5">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wide">
+                          {AREAS.find(a => a.id === doc.currentAreaId)?.name || doc.currentAreaId}
+                      </span>
+                    </td>
+                    <td className="p-5">
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ring-1 ring-inset ${priorityStyle.class}`}>
+                        <PriorityIcon size={12} />
+                        {doc.priority}
+                      </span>
+                    </td>
+                    <td className="p-5">
+                      <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${deadline.color}`}>
+                          {deadline.icon}
+                          <span>{deadline.text}</span>
+                      </div>
+                    </td>
+                    <td className="p-5 text-right pr-8">
+                      <div className="flex items-center justify-end gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                          <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+                              <MoreHorizontal size={20} />
+                          </button>
+                          <button 
+                              onClick={() => openDeriveModal(doc)}
+                              className="bg-slate-900 text-white hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 whitespace-nowrap"
+                          >
+                              Derivar <ArrowRight size={16} />
+                          </button>
+                      </div>
+                    </td>
+                  </tr>
+                )})}
+              </tbody>
+            </table>
+          </div>
           {inboxDocs.length === 0 && (
             <div className="p-16 text-center text-slate-400 flex flex-col items-center">
               <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
@@ -223,7 +225,7 @@ const Inbox: React.FC = () => {
                   <form onSubmit={handleDeriveSubmit} className="p-6 space-y-5">
                       <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
                           <p className="text-xs font-bold text-blue-600 uppercase mb-1">Asunto</p>
-                          <p className="text-sm font-medium text-slate-700 leading-relaxed">{selectedDoc.subject}</p>
+                          <p className="text-sm font-medium text-slate-700 leading-relaxed max-h-24 overflow-y-auto">{selectedDoc.subject}</p>
                       </div>
 
                       <div className="grid grid-cols-2 gap-5">

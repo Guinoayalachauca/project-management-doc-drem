@@ -35,19 +35,19 @@ const Dashboard: React.FC = () => {
   }));
 
   return (
-    <div className="flex-1 bg-slate-50/50 ml-72">
+    <div className="flex-1 bg-slate-50/50 w-full">
       <Header title="Panel de Control" />
       
-      <main className="p-8 max-w-[1600px] mx-auto space-y-8">
+      <main className="p-4 md:p-8 max-w-[1600px] mx-auto space-y-8">
         
         {/* Welcome Section */}
-        <div className="mb-8">
-            <h1 className="text-3xl font-bold text-slate-800">Bienvenido, Administrador</h1>
+        <div className="mb-6 md:mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-800">Bienvenido, Administrador</h1>
             <p className="text-slate-500 mt-1">Resumen de la actividad documental en tiempo real.</p>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           <StatsCard 
             title="Total Expedientes" 
             value={totalDocs} 
@@ -77,15 +77,15 @@ const Dashboard: React.FC = () => {
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Chart */}
-          <div className="lg:col-span-2 bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+          <div className="lg:col-span-2 bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
             <div className="flex justify-between items-center mb-8">
                 <h3 className="text-xl font-bold text-slate-800">Carga por Dirección</h3>
             </div>
-            <div className="h-80">
+            <div className="h-64 md:h-80 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={dataByArea}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} dy={10} />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} dy={10} interval={0} angle={-15} textAnchor="end" height={60} />
                   <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} allowDecimals={false} />
                   <Tooltip 
                     cursor={{fill: '#f8fafc'}} 
@@ -98,7 +98,7 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Secondary Chart */}
-          <div className="lg:col-span-1 bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+          <div className="lg:col-span-1 bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
             <h3 className="text-xl font-bold text-slate-800 mb-2">Estado Actual</h3>
             <p className="text-sm text-slate-400 mb-8">Distribución global de documentos</p>
             

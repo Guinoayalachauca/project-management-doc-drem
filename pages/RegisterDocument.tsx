@@ -89,22 +89,22 @@ const RegisterDocument: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 bg-gray-50 ml-64">
+    <div className="flex-1 bg-gray-50 w-full">
       <Header title="Registro de Documentos" />
       
-      <main className="p-8 max-w-5xl mx-auto">
+      <main className="p-4 md:p-8 max-w-5xl mx-auto">
         <form onSubmit={handleSubmit} className="space-y-6">
             
             {/* Sección 1: Datos Principales */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <div className="bg-gray-50 px-4 md:px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                     <h3 className="font-bold text-gray-800 flex items-center gap-2">
                         <FileText size={18} className="text-red-700"/>
                         Datos del Expediente
                     </h3>
                 </div>
                 
-                <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div className="lg:col-span-2">
                          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Tipo de Documento</label>
                          <select 
@@ -172,7 +172,7 @@ const RegisterDocument: React.FC = () => {
 
             {/* Sección 2: Contenido y Archivo */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <div className="bg-gray-50 px-4 md:px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                     <h3 className="font-bold text-gray-800">Contenido y Archivo Digital</h3>
                     <button
                         type="button"
@@ -184,7 +184,7 @@ const RegisterDocument: React.FC = () => {
                         {isLoadingAI ? 'Analizando...' : 'Asistente IA'}
                     </button>
                 </div>
-                <div className="p-6 space-y-6">
+                <div className="p-4 md:p-6 space-y-6">
                     <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Asunto / Resuelve</label>
                         <textarea 
@@ -197,7 +197,7 @@ const RegisterDocument: React.FC = () => {
 
                     <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Enlace del Archivo PDF</label>
-                        <div className="flex gap-2">
+                        <div className="flex flex-col md:flex-row gap-2">
                              <div className="relative flex-1">
                                 <LinkIcon className="absolute left-3 top-2.5 text-gray-400" size={16} />
                                 <input 
@@ -209,7 +209,7 @@ const RegisterDocument: React.FC = () => {
                                     placeholder="https://drive.google.com/file/d/..."
                                 />
                              </div>
-                             <div className="bg-gray-100 px-3 py-2 rounded border border-gray-200 text-xs text-gray-500 flex items-center">
+                             <div className="bg-gray-100 px-3 py-2 rounded border border-gray-200 text-xs text-gray-500 flex items-center justify-center">
                                  Opcional por espacio
                              </div>
                         </div>
@@ -220,14 +220,14 @@ const RegisterDocument: React.FC = () => {
 
             {/* Sección 3: Derivación Inicial */}
             <div className={`rounded-lg shadow-sm border overflow-hidden transition-all ${aiSuggestion ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-200'}`}>
-                <div className={`px-6 py-4 border-b flex justify-between items-center ${aiSuggestion ? 'bg-blue-100/50 border-blue-200' : 'bg-gray-50 border-gray-200'}`}>
+                <div className={`px-4 md:px-6 py-4 border-b flex justify-between items-center ${aiSuggestion ? 'bg-blue-100/50 border-blue-200' : 'bg-gray-50 border-gray-200'}`}>
                     <h3 className={`font-bold ${aiSuggestion ? 'text-blue-800' : 'text-gray-800'} flex items-center gap-2`}>
                         <Building size={18} /> Derivación Inicial
                     </h3>
                     {aiSuggestion && <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded uppercase font-bold">Sugerido por IA</span>}
                 </div>
                 
-                <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                      <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Área de Destino</label>
                         <select 

@@ -22,9 +22,6 @@ const DocumentSearch: React.FC = () => {
     const query = searchParams.get('q');
     if (query) {
       setSearchTerm(query);
-      // We need to wait for docs to load, but since localstorage is sync, it works
-      // However, performSearch relies on state 'allDocs' which might not be set in first render
-      // Better to fetch directly inside performSearch or depend on allDocs
     }
   }, [searchParams]);
 
@@ -66,29 +63,29 @@ const DocumentSearch: React.FC = () => {
   const getAreaName = (id: string) => AREAS.find(a => a.id === id)?.name || id;
 
   return (
-    <div className="flex-1 bg-slate-100 ml-64">
+    <div className="flex-1 bg-slate-100 w-full">
       <Header title="Seguimiento de Documentos" />
       
-      <main className="p-8 max-w-6xl mx-auto">
+      <main className="p-4 md:p-8 max-w-6xl mx-auto">
         {/* Search Bar */}
-        <div className="bg-white p-10 rounded-xl shadow-md border border-slate-200 mb-8">
+        <div className="bg-white p-6 md:p-10 rounded-xl shadow-md border border-slate-200 mb-8">
           <div className="text-center mb-6">
-            <h2 className="text-3xl font-bold text-slate-800 mb-3">Búsqueda de Expedientes</h2>
-            <p className="text-slate-500 text-lg">Ingrese el N° de Resolución, Código o Asunto</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-800 mb-3">Búsqueda de Expedientes</h2>
+            <p className="text-slate-500 text-sm md:text-lg">Ingrese el N° de Resolución, Código o Asunto</p>
           </div>
           
-          <form onSubmit={handleSearch} className="max-w-2xl mx-auto relative flex gap-2 mb-6">
+          <form onSubmit={handleSearch} className="max-w-2xl mx-auto flex flex-col md:flex-row gap-2 mb-6 relative">
             <div className="relative flex-1">
                 <input
                 type="text"
                 placeholder="Ej. 0892-2024 o Minera El Dorado"
-                className="w-full pl-12 pr-4 py-4 rounded-lg border border-slate-300 text-lg shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all"
+                className="w-full pl-12 pr-4 py-3 md:py-4 rounded-lg border border-slate-300 text-base md:text-lg shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                <Search className="absolute left-4 top-4.5 text-slate-400" size={24} />
+                <Search className="absolute left-4 top-3.5 md:top-4.5 text-slate-400" size={24} />
             </div>
-            <button type="submit" className="bg-red-700 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-red-800 transition-colors shadow-md">
+            <button type="submit" className="bg-red-700 text-white px-8 py-3 md:py-4 rounded-lg font-bold text-base md:text-lg hover:bg-red-800 transition-colors shadow-md w-full md:w-auto">
               Buscar
             </button>
           </form>
@@ -122,7 +119,7 @@ const DocumentSearch: React.FC = () => {
               
               {/* FOUND DOCUMENT CARD */}
               <div className="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
-                <div className="bg-slate-800 text-white px-6 py-4 flex justify-between items-center">
+                <div className="bg-slate-800 text-white px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                     <h3 className="font-bold text-lg flex items-center gap-2">
                         <FileText size={20} className="text-yellow-400"/>
                         Detalle del Documento
@@ -132,11 +129,11 @@ const DocumentSearch: React.FC = () => {
 
                 <div className="p-6">
                     <div className="mb-6">
-                        <h2 className="text-2xl font-bold text-slate-800 mb-2">{selectedDoc.resolutionNumber || selectedDoc.type}</h2>
-                        <p className="text-lg text-slate-600 leading-relaxed">{selectedDoc.subject}</p>
+                        <h2 className="text-xl md:text-2xl font-bold text-slate-800 mb-2">{selectedDoc.resolutionNumber || selectedDoc.type}</h2>
+                        <p className="text-base md:text-lg text-slate-600 leading-relaxed">{selectedDoc.subject}</p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 mb-6 bg-slate-50 p-4 rounded-lg border border-slate-100">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 bg-slate-50 p-4 rounded-lg border border-slate-100">
                         <div>
                             <span className="text-xs font-bold text-slate-500 uppercase block mb-1">Administrado</span>
                             <p className="font-semibold text-slate-800">{selectedDoc.administrado}</p>
@@ -152,17 +149,17 @@ const DocumentSearch: React.FC = () => {
                     {/* ACTION BUTTONS (Downloads) */}
                     <div className="flex flex-wrap gap-4 mt-8 pt-6 border-t border-slate-100">
                         {selectedDoc.pdfUrl ? (
-                            <a href={selectedDoc.pdfUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-red-600 text-white px-5 py-2.5 rounded-md font-bold hover:bg-red-700 transition-colors shadow hover:shadow-md">
+                            <a href={selectedDoc.pdfUrl} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 bg-red-600 text-white px-5 py-2.5 rounded-md font-bold hover:bg-red-700 transition-colors shadow hover:shadow-md w-full sm:w-auto">
                                 <Download size={20} />
                                 Descargar PDF
                             </a>
                         ) : (
-                            <button disabled className="flex items-center gap-2 bg-slate-100 text-slate-400 px-5 py-2.5 rounded-md font-bold cursor-not-allowed">
+                            <button disabled className="flex items-center justify-center gap-2 bg-slate-100 text-slate-400 px-5 py-2.5 rounded-md font-bold cursor-not-allowed w-full sm:w-auto">
                                 <Download size={20} /> Sin PDF
                             </button>
                         )}
                          {selectedDoc.externalUrl && (
-                            <a href={selectedDoc.externalUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-md font-bold hover:bg-blue-700 transition-colors shadow hover:shadow-md">
+                            <a href={selectedDoc.externalUrl} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-md font-bold hover:bg-blue-700 transition-colors shadow hover:shadow-md w-full sm:w-auto">
                                 <ExternalLink size={20} />
                                 Ver Enlace Web
                             </a>
