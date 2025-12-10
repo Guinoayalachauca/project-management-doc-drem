@@ -1,0 +1,5 @@
+{
+  "name": "DREM Apurímac - SISGEDO",
+  "description": "Sistema de Seguimiento Documentario Inteligente para la Dirección Regional de Energía y Minas de Apurímac. Permite el registro, derivación y rastreo de expedientes con asistencia de IA para clasificación y resumen.",
+  "requestFramePermissions": []
+}
