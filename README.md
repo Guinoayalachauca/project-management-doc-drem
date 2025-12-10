@@ -1,20 +1,32 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Project Management Document – DReAM Framework
 
-# Run and deploy your AI Studio app
+Este repositorio contiene la planificación, ejecución y monitoreo del proyecto utilizando el marco metodológico **DReAM (Define – Realize – Monitor)**.  
+El objetivo es asegurar una gestión eficiente, ordenada y completamente trazable durante todo el ciclo de vida del proyecto.
 
-This contains everything you need to run your app locally.
+---
 
-View your app in AI Studio: https://ai.studio/apps/drive/1__kOpg3uiJBLreMv12daD6wddNNUJ3-r
+## 🚀 1. Overview del Proyecto
+El propósito de este documento es describir la estructura del proyecto, sus entregables, responsables, planificación y mecanismos de supervisión, garantizando una gestión integral y profesional.
 
-## Run Locally
+---
 
-**Prerequisites:**  Node.js
+## 📌 2. DEFINE (Definir el Proyecto)
 
+### **2.1 Propósito**
+Describir claramente el problema, la necesidad del proyecto y el valor que generará la solución final.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### **2.2 Alcance**
+- Actividades incluidas  
+- Actividades excluidas  
+- Límites funcionales y técnicos  
+
+### **2.3 Entregables**
+- Documento de requerimientos  
+- Arquitectura o diseño técnico  
+- Prototipos  
+- Desarrollo del sistema  
+- Pruebas  
+- Documentación final  
+
+### **2.5 Cronograma**
+
