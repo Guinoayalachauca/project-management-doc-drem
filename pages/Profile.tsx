@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
-import { User, Mail, Building, Lock, Save, ArrowLeft } from 'lucide-react';
+import { User, Mail, Building, Lock, Save, ArrowLeft, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { User as UserType } from '../types';
 import { saveUser } from '../services/dataService';
@@ -9,9 +9,10 @@ import { AREAS } from '../constants';
 interface ProfileProps {
   currentUser: UserType;
   onUpdateUser: (user: UserType) => void;
+  onLogout: () => void;
 }
 
-const Profile: React.FC<ProfileProps> = ({ currentUser, onUpdateUser }) => {
+const Profile: React.FC<ProfileProps> = ({ currentUser, onUpdateUser, onLogout }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: currentUser.name,
@@ -56,7 +57,8 @@ const Profile: React.FC<ProfileProps> = ({ currentUser, onUpdateUser }) => {
 
   return (
     <div className="flex-1 bg-slate-50 w-full">
-      <Header title="Mi Perfil" user={currentUser} />
+      {/* Pasamos onLogout al Header para que el menú desplegable funcione */}
+      <Header title="Mi Perfil" user={currentUser} onLogout={onLogout} />
       
       <main className="p-4 md:p-8 max-w-4xl mx-auto">
         <button 
@@ -86,6 +88,15 @@ const Profile: React.FC<ProfileProps> = ({ currentUser, onUpdateUser }) => {
                             <span className="truncate">{currentUser.email}</span>
                         </div>
                     </div>
+
+                    <div className="w-full mt-6">
+                        <button 
+                            onClick={onLogout}
+                            className="w-full py-2.5 px-4 rounded-lg bg-red-50 text-red-700 font-bold text-sm hover:bg-red-100 transition-colors flex items-center justify-center gap-2 border border-red-100"
+                        >
+                            <LogOut size={16} /> Cerrar Sesión
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -110,7 +121,7 @@ const Profile: React.FC<ProfileProps> = ({ currentUser, onUpdateUser }) => {
                                     type="text" 
                                     value={formData.name}
                                     onChange={e => setFormData({...formData, name: e.target.value})}
-                                    className="w-full p-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all"
+                                    className="w-full p-3 rounded-lg border border-slate-300 bg-white text-slate-900 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all"
                                 />
                             </div>
                             <div>
@@ -119,7 +130,7 @@ const Profile: React.FC<ProfileProps> = ({ currentUser, onUpdateUser }) => {
                                     type="email" 
                                     value={formData.email}
                                     onChange={e => setFormData({...formData, email: e.target.value})}
-                                    className="w-full p-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all"
+                                    className="w-full p-3 rounded-lg border border-slate-300 bg-white text-slate-900 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all"
                                 />
                             </div>
                         </div>
@@ -136,7 +147,7 @@ const Profile: React.FC<ProfileProps> = ({ currentUser, onUpdateUser }) => {
                                         placeholder="Dejar en blanco para no cambiar"
                                         value={formData.newPassword}
                                         onChange={e => setFormData({...formData, newPassword: e.target.value})}
-                                        className="w-full p-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all"
+                                        className="w-full p-3 rounded-lg border border-slate-300 bg-white text-slate-900 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all"
                                     />
                                 </div>
                                 <div>
@@ -146,7 +157,7 @@ const Profile: React.FC<ProfileProps> = ({ currentUser, onUpdateUser }) => {
                                         placeholder="Repetir nueva contraseña"
                                         value={formData.confirmPassword}
                                         onChange={e => setFormData({...formData, confirmPassword: e.target.value})}
-                                        className="w-full p-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all"
+                                        className="w-full p-3 rounded-lg border border-slate-300 bg-white text-slate-900 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all"
                                     />
                                 </div>
                              </div>

@@ -1,3 +1,4 @@
+
 export enum DocStatus {
   PENDING = 'Pendiente',
   IN_PROCESS = 'En Trámite',
@@ -60,6 +61,10 @@ export interface DocumentRecord {
   subject: string; // Resuelve / Asunto
   pdfUrl?: string; // URL del archivo PDF simulado
   externalUrl?: string; // URL opcional
+  
+  // Nuevos campos geográficos
+  province?: string;
+  district?: string;
 
   // Campos de sistema
   code: string; // Autogenerado o interno
@@ -69,6 +74,9 @@ export interface DocumentRecord {
   priority: DocPriority;
   movements: DocumentMovement[];
   aiSummary?: string;
+  
+  // Nuevo campo para modificar plazos manualmente
+  customDeadline?: string; 
 }
 
 // AI Response types

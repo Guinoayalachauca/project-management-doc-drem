@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
-import { Settings, Bell, Shield, Save, Database, RefreshCcw, Lock, Key, DownloadCloud, CheckCircle } from 'lucide-react';
+import { Settings, Bell, Shield, Save, Database, RefreshCcw, Lock, Key, DownloadCloud } from 'lucide-react';
 import { getSystemConfig, saveSystemConfig, saveUser } from '../services/dataService';
 import { SystemConfig, User } from '../types';
 
@@ -8,20 +9,33 @@ type TabType = 'GENERAL' | 'SECURITY' | 'BACKUP' | 'NOTIFICATIONS';
 
 interface ConfigurationProps {
     currentUser: User;
+    onLogout: () => void;
 }
 
-const Configuration: React.FC<ConfigurationProps> = ({ currentUser }) => {
+const DEFAULT_CONFIG: SystemConfig = {
+  institutionName: 'DREM Apurímac',
+  currentYear: '2025',
+  deadlineNormal: 7,
+  deadlineUrgent: 2,
+  autoNumbering: true,
+  enable2FA: false,
+  emailNotifications: true,
+  systemMaintenanceMode: false
+};
+
+const Configuration: React.FC<ConfigurationProps> = ({ currentUser, onLogout }) => {
   const [activeTab, setActiveTab] = useState<TabType>('GENERAL');
   const [isLoading, setIsLoading] = useState(false);
-  const [config, setConfig] = useState<SystemConfig>(getSystemConfig());
+  // Fix: Initialize state with object, not promise
+  const [config, setConfig] = useState<SystemConfig>(DEFAULT_CONFIG);
   
   // Security Tab State
   const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
   const [securityMsg, setSecurityMsg] = useState('');
 
   useEffect(() => {
-    // Load config on mount to ensure fresh data
-    setConfig(getSystemConfig());
+    // Fix: Handle promise from getSystemConfig
+    getSystemConfig().then(setConfig);
   }, []);
 
   const handleConfigChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,7 +100,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ currentUser }) => {
 
   return (
     <div className="flex-1 bg-slate-50 w-full">
-      <Header title="Configuración del Sistema" user={currentUser} />
+      <Header title="Configuración del Sistema" user={currentUser} onLogout={onLogout} />
       
       <main className="p-4 md:p-8 max-w-5xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -113,7 +127,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ currentUser }) => {
                                     type="text" 
                                     value={config.institutionName} 
                                     onChange={handleConfigChange}
-                                    className="w-full p-3 rounded-md border border-slate-300 text-sm outline-none focus:border-red-500" 
+                                    className="w-full p-3 bg-white text-slate-900 rounded-md border border-slate-300 text-sm outline-none focus:border-red-500" 
                                 />
                             </div>
                             <div>
@@ -123,7 +137,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ currentUser }) => {
                                     type="number" 
                                     value={config.currentYear} 
                                     onChange={handleConfigChange}
-                                    className="w-32 p-3 rounded-md border border-slate-300 text-sm outline-none focus:border-red-500" 
+                                    className="w-32 p-3 bg-white text-slate-900 rounded-md border border-slate-300 text-sm outline-none focus:border-red-500" 
                                 />
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -134,7 +148,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ currentUser }) => {
                                         type="number" 
                                         value={config.deadlineNormal} 
                                         onChange={handleConfigChange}
-                                        className="w-full p-3 rounded-md border border-slate-300 text-sm outline-none focus:border-red-500" 
+                                        className="w-full p-3 bg-white text-slate-900 rounded-md border border-slate-300 text-sm outline-none focus:border-red-500" 
                                     />
                                 </div>
                                 <div>
@@ -144,7 +158,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ currentUser }) => {
                                         type="number" 
                                         value={config.deadlineUrgent} 
                                         onChange={handleConfigChange}
-                                        className="w-full p-3 rounded-md border border-slate-300 text-sm outline-none focus:border-red-500" 
+                                        className="w-full p-3 bg-white text-slate-900 rounded-md border border-slate-300 text-sm outline-none focus:border-red-500" 
                                     />
                                 </div>
                             </div>
@@ -155,13 +169,13 @@ const Configuration: React.FC<ConfigurationProps> = ({ currentUser }) => {
                                         type="checkbox" 
                                         checked={config.autoNumbering} 
                                         onChange={handleConfigChange}
-                                        className="w-4 h-4 text-red-600 rounded border-slate-300 focus:ring-red-500" 
+                                        className="w-4 h-4 text-red-600 rounded border-slate-300 focus:ring-red-500 bg-white" 
                                     />
                                     <span className="text-sm text-slate-700">Habilitar numeración automática de expedientes</span>
                                 </label>
                             </div>
                             <div className="pt-4 flex flex-col sm:flex-row justify-end gap-4 border-t border-slate-100 mt-6">
-                                <button onClick={() => setConfig(getSystemConfig())} className="px-6 py-2.5 rounded-lg bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 flex items-center justify-center gap-2">
+                                <button onClick={() => getSystemConfig().then(setConfig)} className="px-6 py-2.5 rounded-lg bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 flex items-center justify-center gap-2">
                                     <RefreshCcw size={18} /> Restaurar
                                 </button>
                                 <button onClick={handleSaveGeneral} disabled={isLoading} className="px-6 py-2.5 rounded-lg bg-green-600 text-white font-bold hover:bg-green-700 flex items-center justify-center gap-2 disabled:opacity-50">
@@ -188,17 +202,17 @@ const Configuration: React.FC<ConfigurationProps> = ({ currentUser }) => {
                                     <input 
                                         type="password" placeholder="Contraseña Actual" required
                                         value={passwords.current} onChange={e => setPasswords({...passwords, current: e.target.value})}
-                                        className="w-full p-2 border border-orange-200 rounded bg-white text-sm" 
+                                        className="w-full p-2 border border-orange-200 rounded bg-white text-slate-900 text-sm" 
                                     />
                                     <input 
                                         type="password" placeholder="Nueva Contraseña" required
                                         value={passwords.new} onChange={e => setPasswords({...passwords, new: e.target.value})}
-                                        className="w-full p-2 border border-orange-200 rounded bg-white text-sm" 
+                                        className="w-full p-2 border border-orange-200 rounded bg-white text-slate-900 text-sm" 
                                     />
                                     <input 
                                         type="password" placeholder="Confirmar Nueva Contraseña" required
                                         value={passwords.confirm} onChange={e => setPasswords({...passwords, confirm: e.target.value})}
-                                        className="w-full p-2 border border-orange-200 rounded bg-white text-sm" 
+                                        className="w-full p-2 border border-orange-200 rounded bg-white text-slate-900 text-sm" 
                                     />
                                     <button type="submit" className="bg-orange-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-orange-700 w-full sm:w-auto">Actualizar Contraseña</button>
                                 </div>
@@ -295,7 +309,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ currentUser }) => {
                                     type="checkbox" 
                                     checked={config.emailNotifications}
                                     onChange={(e) => { handleConfigChange(e); handleSaveGeneral(); }}
-                                    className="w-5 h-5 text-red-600 rounded focus:ring-red-500"
+                                    className="w-5 h-5 text-red-600 rounded focus:ring-red-500 bg-white"
                                 />
                             </label>
                              <label className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer">
@@ -308,7 +322,7 @@ const Configuration: React.FC<ConfigurationProps> = ({ currentUser }) => {
                                     type="checkbox" 
                                     checked={config.systemMaintenanceMode}
                                     onChange={(e) => { handleConfigChange(e); handleSaveGeneral(); }}
-                                    className="w-5 h-5 text-red-600 rounded focus:ring-red-500"
+                                    className="w-5 h-5 text-red-600 rounded focus:ring-red-500 bg-white"
                                 />
                             </label>
                         </div>

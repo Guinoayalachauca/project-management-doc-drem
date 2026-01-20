@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { AIRoutingSuggestion, DocPriority } from "../types";
 import { AREAS } from "../constants";
@@ -10,6 +11,7 @@ const getAIClient = () => {
   return new GoogleGenAI({ apiKey: process.env.API_KEY });
 };
 
+// Use gemini-3-flash-preview for classification and routing suggestions
 export const analyzeDocument = async (
   subject: string,
   description: string
@@ -42,7 +44,7 @@ export const analyzeDocument = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -68,13 +70,14 @@ export const analyzeDocument = async (
   }
 };
 
+// Use gemini-3-flash-preview for text summarization
 export const summarizeContent = async (text: string): Promise<string | null> => {
   const ai = getAIClient();
   if (!ai) return null;
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-flash-preview",
       contents: `Resume el siguiente texto técnico/administrativo en un solo párrafo conciso para un sistema de trámite documentario. Texto: ${text}`,
     });
     return response.text || null;
