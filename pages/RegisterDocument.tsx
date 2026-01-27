@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Save, FileText, Calendar, User as UserIcon, Hash, Link as LinkIcon, AlertCircle, MapPin } from 'lucide-react';
+import { Save, FileText, User as UserIcon, Link as LinkIcon, CheckCircle2, ArrowRight, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import { DOCUMENT_TYPES } from '../constants';
@@ -20,6 +20,9 @@ const UBICACIONES = {
 const RegisterDocument: React.FC<{ currentUser: User | null; onLogout: () => void }> = ({ currentUser, onLogout }) => {
   const navigate = useNavigate();
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSaving, setIsSaving] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [registeredCode, setRegisteredCode] = useState('');
 
   const [formData, setFormData] = useState({
     type: 'Resolución',
@@ -45,44 +48,73 @@ const RegisterDocument: React.FC<{ currentUser: User | null; onLogout: () => voi
     const newErrors: Record<string, string> = {};
     if (!formData.administrado.trim()) newErrors.administrado = "Este campo es obligatorio";
     if (!formData.content.trim()) newErrors.content = "El asunto o contenido es obligatorio";
-    if (formData.ruc && !/^\d{11}$/.test(formData.ruc)) newErrors.ruc = "El RUC debe tener exactamente 11 dígitos numéricos";
+    if (formData.ruc && !/^\d{11}$/.test(formData.ruc)) newErrors.ruc = "El RUC debe tener exactamente 11 dígitos";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
     
+    setIsSaving(true);
     const newId = Date.now().toString();
     const docCode = `${formData.type.substring(0,3).toUpperCase()}-${formData.year}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-    addDocument({
-        ...formData,
-        id: newId,
-        code: docCode,
-        registerDate: new Date().toISOString(),
-        currentAreaId: 'MESA',
-        status: DocStatus.PENDING,
-        subject: formData.content,
-        movements: [{
-            id: `mov-${Date.now()}`,
-            documentId: newId,
-            fromAreaId: 'EXTERNO', 
-            toAreaId: 'MESA',
-            date: new Date().toISOString(),
-            action: 'Registro en Sistema',
-            notes: 'Ingreso inicial por Mesa de Partes.',
-            user: currentUser?.name || 'Usuario'
-        }]
-    } as any);
+    try {
+        await addDocument({
+            ...formData,
+            id: newId,
+            code: docCode,
+            registerDate: new Date().toISOString(),
+            currentAreaId: 'MESA',
+            status: DocStatus.PENDING,
+            subject: formData.content,
+            movements: [{
+                id: `mov-${Date.now()}`,
+                documentId: newId,
+                fromAreaId: 'EXTERNO', 
+                toAreaId: 'MESA',
+                date: new Date().toISOString(),
+                action: 'Registro en Sistema',
+                notes: 'Ingreso inicial por Mesa de Partes.',
+                user: currentUser?.name || 'Usuario'
+            }]
+        } as any);
 
-    alert("Expediente " + docCode + " registrado correctamente.");
-    navigate('/');
+        setRegisteredCode(docCode);
+        setShowSuccess(true);
+    } catch (err) {
+        alert("Error al guardar en Firebase. Verifique su conexión.");
+    } finally {
+        setIsSaving(false);
+    }
   };
 
   const labelClass = "text-[11px] font-black text-slate-800 uppercase tracking-widest ml-1 mb-2 block";
   const inputClass = "w-full p-4 bg-white text-slate-900 border-2 border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-[#991b1b] focus:ring-4 focus:ring-red-500/5 transition-all shadow-sm placeholder:text-slate-300";
+
+  if (showSuccess) {
+      return (
+          <div className="flex-1 bg-slate-50 flex items-center justify-center p-4">
+              <div className="bg-white p-12 rounded-[3rem] shadow-2xl border border-slate-200 text-center max-w-md animate-fade-in">
+                  <div className="w-24 h-24 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
+                      <CheckCircle2 size={56} />
+                  </div>
+                  <h2 className="text-3xl font-black text-slate-900 mb-4 tracking-tighter">¡REGISTRO EXITOSO!</h2>
+                  <p className="text-slate-500 font-bold mb-8">El expediente <span className="text-[#991b1b] font-black">{registeredCode}</span> ha sido guardado correctamente en la nube.</p>
+                  <div className="space-y-3">
+                      <button onClick={() => navigate('/inbox')} className="w-full bg-[#991b1b] text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 shadow-xl hover:bg-red-800 transition-all">
+                          Ver en Bandeja <ArrowRight size={18}/>
+                      </button>
+                      <button onClick={() => setShowSuccess(false)} className="w-full bg-slate-100 text-slate-600 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all">
+                          Registrar Otro
+                      </button>
+                  </div>
+              </div>
+          </div>
+      );
+  }
 
   return (
     <div className="flex-1 bg-slate-50 w-full">
@@ -118,12 +150,10 @@ const RegisterDocument: React.FC<{ currentUser: User | null; onLogout: () => voi
                             <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
                             <input name="administrado" value={formData.administrado} onChange={handleChange} className={`${inputClass} pl-12 ${errors.administrado ? 'border-red-400 bg-red-50/10' : ''}`} placeholder="Apellidos y Nombres o Razón Social" />
                         </div>
-                        {errors.administrado && <p className="text-[10px] text-red-600 font-black mt-2 ml-2 uppercase tracking-wider">{errors.administrado}</p>}
                     </div>
                     <div className="md:col-span-1">
                         <label className={labelClass}>RUC (Opcional)</label>
                         <input name="ruc" value={formData.ruc} onChange={handleChange} className={`${inputClass} ${errors.ruc ? 'border-red-400 bg-red-50/10' : ''}`} placeholder="20123456789" maxLength={11} />
-                        {errors.ruc && <p className="text-[10px] text-red-600 font-black mt-2 ml-2 uppercase tracking-wider">{errors.ruc}</p>}
                     </div>
 
                     <div className="md:col-span-2">
@@ -142,14 +172,13 @@ const RegisterDocument: React.FC<{ currentUser: User | null; onLogout: () => voi
             </div>
 
             <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
-                <div className="bg-slate-50/50 px-10 py-6 border-b border-slate-100 flex justify-between items-center">
+                <div className="bg-slate-50/50 px-10 py-6 border-b border-slate-100">
                     <h3 className="font-black text-slate-900 uppercase text-xs tracking-[0.2em]">Asunto y Detalle del Trámite</h3>
                 </div>
                 <div className="p-10 space-y-8">
                     <div>
                         <label className={labelClass}>Sumilla / Contenido del Documento</label>
-                        <textarea name="content" value={formData.content} onChange={handleChange} rows={5} className={`${inputClass} resize-none ${errors.content ? 'border-red-400 bg-red-50/10' : ''}`} placeholder="Escriba aquí el resumen o el objeto principal del documento..."></textarea>
-                        {errors.content && <p className="text-[10px] text-red-600 font-black mt-2 ml-2 uppercase tracking-wider">{errors.content}</p>}
+                        <textarea name="content" value={formData.content} onChange={handleChange} rows={5} className={`${inputClass} resize-none ${errors.content ? 'border-red-400 bg-red-50/10' : ''}`} placeholder="Resumen del documento..."></textarea>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -163,7 +192,7 @@ const RegisterDocument: React.FC<{ currentUser: User | null; onLogout: () => voi
                             <label className={labelClass}>Enlace PDF (URL)</label>
                             <div className="relative">
                                 <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
-                                <input name="pdfUrl" value={formData.pdfUrl} onChange={handleChange} className={`${inputClass} pl-12`} placeholder="https://ejemplo.com/archivo.pdf" />
+                                <input name="pdfUrl" value={formData.pdfUrl} onChange={handleChange} className={`${inputClass} pl-12`} placeholder="https://..." />
                             </div>
                         </div>
                     </div>
@@ -172,8 +201,9 @@ const RegisterDocument: React.FC<{ currentUser: User | null; onLogout: () => voi
 
             <div className="flex justify-end gap-4 pt-6">
                 <button type="button" onClick={() => navigate('/')} className="px-10 py-5 rounded-2xl bg-white border-2 border-slate-200 text-slate-500 font-black uppercase text-xs tracking-widest hover:bg-slate-50 transition-all">Cancelar</button>
-                <button type="submit" className="px-12 py-5 rounded-2xl bg-[#991b1b] text-white font-black uppercase text-xs tracking-widest hover:bg-red-800 shadow-xl shadow-red-900/20 transition-all active:scale-95 flex items-center gap-3">
-                    <Save size={18} /> Guardar Registro
+                <button type="submit" disabled={isSaving} className="px-12 py-5 rounded-2xl bg-[#991b1b] text-white font-black uppercase text-xs tracking-widest hover:bg-red-800 shadow-xl shadow-red-900/20 transition-all active:scale-95 flex items-center gap-3">
+                    {isSaving ? <Loader2 className="animate-spin" size={18}/> : <Save size={18} />} 
+                    {isSaving ? 'Guardando...' : 'Guardar Registro'}
                 </button>
             </div>
         </form>

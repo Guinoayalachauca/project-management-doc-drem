@@ -1,115 +1,164 @@
 
-import { DocumentRecord, User, SystemConfig } from '../types';
-import { MOCK_DOCUMENTS, MOCK_USERS } from '../constants';
+import { 
+  collection, 
+  getDocs, 
+  getDoc, 
+  doc, 
+  setDoc, 
+  updateDoc, 
+  deleteDoc, 
+  query, 
+  orderBy, 
+  limit 
+} from "firebase/firestore";
+import { db } from "./firebase";
+import { DocumentRecord, User, SystemConfig, Notification } from '../types';
+import { MOCK_USERS, MOCK_DOCUMENTS } from '../constants';
 
-const STORAGE_KEYS = {
-  DOCUMENTS: 'sisgedo_documents',
-  USERS: 'sisgedo_users',
-  CONFIG: 'sisgedo_config'
-};
-
-// Auxiliar para inicializar datos si no existen
-const getStoredData = <T>(key: string, defaultValue: T): T => {
-  try {
-    const data = localStorage.getItem(key);
-    if (!data) {
-      localStorage.setItem(key, JSON.stringify(defaultValue));
-      return defaultValue;
-    }
-    return JSON.parse(data);
-  } catch (error) {
-    console.error("Error accediendo a localStorage", error);
-    return defaultValue;
-  }
-};
-
-// Documentos
+// --- DOCUMENTOS ---
 export const getDocuments = async (): Promise<DocumentRecord[]> => {
-  return getStoredData<DocumentRecord[]>(STORAGE_KEYS.DOCUMENTS, MOCK_DOCUMENTS);
+  try {
+    const querySnapshot = await getDocs(collection(db, "documents"));
+    const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DocumentRecord));
+    if (docs.length === 0) {
+      for (const d of MOCK_DOCUMENTS) {
+        await setDoc(doc(db, "documents", d.id), d);
+      }
+      return MOCK_DOCUMENTS;
+    }
+    return docs;
+  } catch (error) {
+    console.error("Error Firebase:", error);
+    return [];
+  }
 };
 
 export const addDocument = async (document: DocumentRecord): Promise<string> => {
-  const docs = await getDocuments();
-  const updatedDocs = [document, ...docs];
-  localStorage.setItem(STORAGE_KEYS.DOCUMENTS, JSON.stringify(updatedDocs));
-  return document.id;
+  try {
+    const { id, ...data } = document;
+    await setDoc(doc(db, "documents", id), data);
+    await addNotification({
+      id: `notif-${Date.now()}`,
+      title: 'Nuevo Registro',
+      message: `Expediente ${document.code} registrado.`,
+      time: 'Ahora',
+      read: false,
+      type: 'info'
+    });
+    return id;
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const updateDocument = async (updatedDoc: DocumentRecord): Promise<void> => {
-  const docs = await getDocuments();
-  const updatedDocs = docs.map(d => d.id === updatedDoc.id ? updatedDoc : d);
-  localStorage.setItem(STORAGE_KEYS.DOCUMENTS, JSON.stringify(updatedDocs));
+  try {
+    const { id, ...data } = updatedDoc;
+    await updateDoc(doc(db, "documents", id), data);
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const deleteDocument = async (id: string): Promise<void> => {
-  const docs = await getDocuments();
-  const updatedDocs = docs.filter(d => d.id !== id);
-  localStorage.setItem(STORAGE_KEYS.DOCUMENTS, JSON.stringify(updatedDocs));
+  try {
+    await deleteDoc(doc(db, "documents", id));
+  } catch (error) {
+    throw error;
+  }
 };
 
-// Usuarios
+// --- USUARIOS (Firestore Sync) ---
 export const getUsers = async (): Promise<User[]> => {
-  return getStoredData<User[]>(STORAGE_KEYS.USERS, MOCK_USERS);
+  try {
+    const querySnapshot = await getDocs(collection(db, "users"));
+    const users = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
+    // Semilla inicial si está vacío
+    if (users.length === 0) {
+      for (const u of MOCK_USERS) {
+        await setDoc(doc(db, "users", u.id), u);
+      }
+      return MOCK_USERS;
+    }
+    return users;
+  } catch (error) {
+    console.error("Error al obtener usuarios de Firebase:", error);
+    return [];
+  }
 };
 
 export const saveUser = async (user: User): Promise<void> => {
-  const users = await getUsers();
-  const exists = users.find(u => u.id === user.id);
-  const updatedUsers = exists 
-    ? users.map(u => u.id === user.id ? user : u)
-    : [...users, user];
-  localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updatedUsers));
+  try {
+    const { id, ...data } = user;
+    // Usamos setDoc con merge:true para no borrar campos si solo actualizamos algunos
+    await setDoc(doc(db, "users", id), data, { merge: true });
+  } catch (error) {
+    console.error("Error al guardar usuario en Firebase:", error);
+    throw error;
+  }
 };
 
 export const deleteUser = async (id: string): Promise<void> => {
-  const users = await getUsers();
-  const updatedUsers = users.filter(u => u.id !== id);
-  localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(updatedUsers));
+  try {
+    await deleteDoc(doc(db, "users", id));
+  } catch (error) {
+    console.error("Error al eliminar usuario en Firebase:", error);
+    throw error;
+  }
 };
 
 export const authenticateUser = async (emailOrRole: string, password: string): Promise<User | undefined> => {
-  const cleanEmailOrRole = emailOrRole.trim().toLowerCase();
-  
-  // 1. Intentar buscar en los usuarios guardados en LocalStorage (datos dinámicos)
-  const storedUsers = await getUsers();
-  let user = storedUsers.find(u => 
-    (u.email.toLowerCase() === cleanEmailOrRole || u.role.toLowerCase() === cleanEmailOrRole) 
-    && u.password === password
-  );
-
-  // 2. SALVAGUARDA PARA HOSTING: 
-  // Si no se encuentra en storage (o el storage se corrompió al subir), 
-  // forzamos la verificación contra la lista original (MOCK_USERS).
-  if (!user) {
-    user = MOCK_USERS.find(u => 
-        (u.email.toLowerCase() === cleanEmailOrRole || u.role.toLowerCase() === cleanEmailOrRole) 
-        && u.password === password
+  try {
+    // Nota: Para sistemas grandes se usaría Firebase Auth, 
+    // pero para este flujo consultamos la colección de usuarios.
+    const users = await getUsers();
+    const cleanEntry = emailOrRole.trim().toLowerCase();
+    return users.find(u => 
+      (u.email.toLowerCase() === cleanEntry || u.role.toLowerCase() === cleanEntry) 
+      && u.password === password
     );
-    
-    // Si logueó exitosamente con un usuario base, nos aseguramos que exista en storage para la próxima
-    if (user) {
-        await saveUser(user);
-    }
+  } catch (error) {
+    return undefined;
   }
-
-  return user;
 };
 
-// Configuración
+// --- NOTIFICACIONES ---
+export const getNotifications = async (): Promise<Notification[]> => {
+  try {
+    const q = query(collection(db, "notifications"), orderBy("id", "desc"), limit(20));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => doc.data() as Notification);
+  } catch (error) {
+    return [];
+  }
+};
+
+export const addNotification = async (notif: Notification): Promise<void> => {
+  try {
+    await setDoc(doc(db, "notifications", notif.id), notif);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+// --- CONFIGURACIÓN ---
 export const getSystemConfig = async (): Promise<SystemConfig> => {
-  const defaultConfig: SystemConfig = {
-    institutionName: 'DREM Apurímac',
-    currentYear: '2026',
-    deadlineNormal: 7,
-    deadlineUrgent: 2,
-    autoNumbering: true,
-    enable2FA: false,
-    emailNotifications: true,
-    systemMaintenanceMode: false
-  };
-  return getStoredData<SystemConfig>(STORAGE_KEYS.CONFIG, defaultConfig);
+  try {
+    const docRef = doc(db, "config", "system");
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) return docSnap.data() as SystemConfig;
+    const def = { institutionName: 'DREM Apurímac', currentYear: '2026', deadlineNormal: 7, deadlineUrgent: 2, autoNumbering: true, enable2FA: false, emailNotifications: true, systemMaintenanceMode: false };
+    await setDoc(docRef, def);
+    return def;
+  } catch (error) {
+    return {} as SystemConfig;
+  }
 };
 
 export const saveSystemConfig = async (config: SystemConfig): Promise<void> => {
-  localStorage.setItem(STORAGE_KEYS.CONFIG, JSON.stringify(config));
+  try {
+    await setDoc(doc(db, "config", "system"), config);
+  } catch (error) {
+    console.error(error);
+  }
 };
